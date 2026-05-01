@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Websites - Visitor Tracking Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      color: #1a202c;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: #718096;
+      font-size: 1rem;
+    }
+
+    .website-selector {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .website-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.5rem;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .website-btn:hover {
+      border-color: #667eea;
+      background: #f7fafc;
+    }
+
+    .website-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card h3 {
+      color: #718096;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+      color: #1a202c;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+
+    .visitors-table {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+
+    .visitors-table h2 {
+      color: #1a202c;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-controls select,
+    .filter-controls input {
+      padding: 0.5rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .filter-controls select:focus,
+    .filter-controls input:focus {
+      border-color: #667eea;
+    }
+
+    .refresh-btn {
+      padding: 0.5rem 1.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .refresh-btn:hover {
+      background: #5568d3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f7fafc;
+    }
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+    }
+
+    tbody tr:hover {
+      background: #f7fafc;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-online {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .status-offline {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .device-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: #718096;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .stat-card .value {
+        font-size: 2rem;
+      }
+
+      table {
+        font-size: 0.875rem;
+      }
+
+      th, td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🌐 All Websites Dashboard</h1>
+      <p>Monitor visitors across all your websites</p>
+    </div>
+
+    <!-- Website Selector -->
+    <div class="website-selector">
+      <button class="website-btn active" onclick="selectWebsite('all')" id="btn-all">
+        All Websites
+      </button>
+      <button class="website-btn" onclick="selectWebsite('wedding-invitation')" id="btn-wedding-invitation">
+        💍 Wedding Invitation
+      </button>
+      <button class="website-btn" onclick="selectWebsite('my-other-website')" id="btn-my-other-website">
+        🌐 Other Website
+      </button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Visitors</h3>
+        <div class="value" id="totalVisitors">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Online Now</h3>
+        <div class="value" id="onlineNow">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Today</h3>
+        <div class="value" id="todayVisitors">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>This Hour</h3>
+        <div class="value" id="hourVisitors">0</div>
+      </div>
+    </div>
+
+    <!-- Visitors Table -->
+    <div class="visitors-table">
+      <h2>Visitor Details</h2>
+      
+      <div class="filter-controls">
+        <select id="statusFilter" onchange="renderTable()">
+          <option value="all">All Status</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+        </select>
+
+        <input type="text" id="searchInput" placeholder="Search..." onkeyup="renderTable()">
+        
+        <button class="refresh-btn" onclick="loadVisitors()">🔄 Refresh</button>
+      </div>
+
+      <div id="tableContainer">
+        <div class="loading">Loading visitor data...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDobJoThr66qCjl7ULmA6q37iIPo5rSoIA",
+      authDomain: "onlinebus-b50f9.firebaseapp.com",
+      databaseURL: "https://onlinebus-b50f9-default-rtdb.firebaseio.com",
+      projectId: "onlinebus-b50f9",
+      storageBucket: "onlinebus-b50f9.firebasestorage.app",
+      messagingSenderId: "522275438422",
+      appId: "1:522275438422:web:bc748e514a1074117ea0f7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    let allVisitors = [];
+    let currentWebsite = 'all';
+
+    window.selectWebsite = function(websiteId) {
+      currentWebsite = websiteId;
+      
+      // Update button states
+      document.querySelectorAll('.website-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`btn-${websiteId}`).classList.add('active');
+      
+      renderTable();
+      updateStats();
+    };
+
+    function loadVisitors() {
+      const websitesRef = ref(database, 'websites');
+      onValue(websitesRef, (snapshot) => {
+        allVisitors = [];
+        const data = snapshot.val();
+        const now = Date.now();
+        const onlineThreshold = 5 * 60 * 1000;
+        const deleteThreshold = 24 * 60 * 60 * 1000;
+        
+        if (data) {
+          Object.keys(data).forEach(websiteId => {
+            const visitors = data[websiteId].visitors || {};
+            
+            Object.keys(visitors).forEach(visitorId => {
+              const visitor = visitors[visitorId];
+              const timeSinceLastSeen = now - visitor.lastSeen;
+              
+              // Delete visitors older than 24 hours
+              if (timeSinceLastSeen > deleteThreshold) {
+                remove(ref(database, `websites/${websiteId}/visitors/${visitorId}`));
+                return;
+              }
+              
+              visitor.id = visitorId;
+              visitor.website = websiteId;
+              visitor.isOnline = timeSinceLastSeen < onlineThreshold;
+              allVisitors.push(visitor);
+            });
+          });
+        }
+
+        updateStats();
+        renderTable();
+      });
+    }
+
+    function updateStats() {
+      const now = Date.now();
+      const hourAgo = now - (60 * 60 * 1000);
+      const dayStart = new Date().setHours(0, 0, 0, 0);
+
+      let filtered = allVisitors;
+      if (currentWebsite !== 'all') {
+        filtered = allVisitors.filter(v => v.website === currentWebsite);
+      }
+
+      const total = filtered.length;
+      const online = filtered.filter(v => v.isOnline).length;
+      const today = filtered.filter(v => v.timestamp >= dayStart).length;
+      const thisHour = filtered.filter(v => v.timestamp >= hourAgo).length;
+
+      document.getElementById('totalVisitors').textContent = total;
+      document.getElementById('onlineNow').textContent = online;
+      document.getElementById('todayVisitors').textContent = today;
+      document.getElementById('hourVisitors').textContent = thisHour;
+    }
+
+    window.renderTable = function() {
+      const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+      const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+
+      let filtered = allVisitors;
+
+      // Filter by website
+      if (currentWebsite !== 'all') {
+        filtered = filtered.filter(v => v.website === currentWebsite);
+      }
+
+      // Filter by status
+      if (statusFilter === 'online') {
+        filtered = filtered.filter(v => v.isOnline);
+      } else if (statusFilter === 'offline') {
+        filtered = filtered.filter(v => !v.isOnline);
+      }
+
+      // Search
+      if (searchTerm) {
+        filtered = filtered.filter(v => 
+          (v.guestName || '').toLowerCase().includes(searchTerm) ||
+          (v.page || '').toLowerCase().includes(searchTerm) ||
+          (v.website || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      // Sort by last seen
+      filtered.sort((a, b) => b.lastSeen - a.lastSeen);
+
+      const tableContainer = document.getElementById('tableContainer');
+
+      if (filtered.length === 0) {
+        tableContainer.innerHTML = '<div class="no-data">No visitors found</div>';
+        return;
+      }
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Website</th>
+              <th>Page</th>
+              <th>Guest/User</th>
+              <th>Device</th>
+              <th>Browser</th>
+              <th>Last Seen</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      filtered.forEach(visitor => {
+        const statusClass = visitor.isOnline ? 'status-online' : 'status-offline';
+        const statusText = visitor.isOnline ? 'Online' : 'Offline';
+        const lastSeen = formatLastSeen(visitor.lastSeen, visitor.isOnline);
+        const duration = formatDuration(visitor.duration || 0);
+
+        html += `
+          <tr>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>${visitor.website}</td>
+            <td>${visitor.page || 'Unknown'}</td>
+            <td>${visitor.guestName || 'Anonymous'}</td>
+            <td>
+              <div class="device-icon">
+                ${getDeviceIcon(visitor.device)}
+                ${visitor.device || 'Unknown'}
+              </div>
+            </td>
+            <td>${visitor.browser || 'Unknown'}</td>
+            <td>${lastSeen}</td>
+            <td>${duration}</td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      tableContainer.innerHTML = html;
+    };
+
+    function formatLastSeen(timestamp, isOnline) {
+      if (isOnline) return 'Online now';
+      
+      const diff = Date.now() - timestamp;
+      if (diff < 60000) return 'Just now';
+      if (diff < 3600000) return `Last seen ${Math.floor(diff / 60000)}m ago`;
+      if (diff < 86400000) return `Last seen ${Math.floor(diff / 3600000)}h ago`;
+      return `Last seen ${new Date(timestamp).toLocaleString()}`;
+    }
+
+    function formatDuration(seconds) {
+      if (seconds < 60) return `${seconds}s`;
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+      return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+    }
+
+    function getDeviceIcon(device) {
+      if (!device) return '📱';
+      const d = device.toLowerCase();
+      if (d.includes('mobile') || d.includes('android') || d.includes('iphone')) return '📱';
+      if (d.includes('tablet') || d.includes('ipad')) return '📱';
+      return '💻';
+    }
+
+    window.loadVisitors = loadVisitors;
+    loadVisitors();
+    setInterval(loadVisitors, 10000);
+  </script>
+</body>
+</html>
